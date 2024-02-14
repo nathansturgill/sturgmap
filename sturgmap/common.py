@@ -6,11 +6,3 @@ def hello_world():
     """
     print("Hello World!")
 
-
-    def random_number()
-    import random
-    return random.random()
-
-
-
-        
