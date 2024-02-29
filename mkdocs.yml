@@ -86,5 +86,5 @@ nav:
           - common module: common.md
 
     - Labs:
-    notebooks-labs/GEOG_510_lab4 (1).ipynb
+        - labs/GEOG_510_lab4 (1).ipynb
     
