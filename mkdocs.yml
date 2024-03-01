@@ -84,6 +84,5 @@ nav:
     - API Reference:
           - sturgmap module: sturgmap.md
           - common module: common.md
-
-    - Labs:
-        - labs/GEOG_510_lab4 (1).ipynb
+    - Lab:
+          - docs/510labs/GEOG_510_lab4.ipynb
