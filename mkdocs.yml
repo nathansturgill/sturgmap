@@ -81,11 +81,12 @@ nav:
     - Report Issues: https://github.com/nathansturgill/sturgmap/issues
     - Examples:
         - examples/intro.ipynb
+        - labs/GEOG_510_lab4 (1).ipynb
     - API Reference:
           - sturgmap module: sturgmap.md
           - common module: common.md
 
     - Labs:
-        - labs/GEOG_510_lab4 (1).ipynb
+    labs/GEOG_510_lab4 (1).ipynb
         
     
