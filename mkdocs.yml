@@ -85,4 +85,4 @@ nav:
           - sturgmap module: sturgmap.md
           - common module: common.md
     - Lab:
-          - lab/GEOG_510_lab4.ipynb
+          - 510labs/GEOG_510_lab4.ipynb
