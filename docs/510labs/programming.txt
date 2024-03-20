@@ -1,0 +1,2 @@
+I like that you can create visualization techniques to solve problems
+I love that you can create different functions and loops for those functions based on user inputs.
