@@ -81,6 +81,7 @@ nav:
     - Report Issues: https://github.com/nathansturgill/sturgmap/issues
     - Examples:
         - examples/intro.ipynb
+        - examples/ipyleaflet.ipynb
     - API Reference:
           - sturgmap module: sturgmap.md
           - common module: common.md
