@@ -83,7 +83,7 @@ nav:
         - examples/intro.ipynb
         - examples/ipyleaflet.ipynb
     - API Reference:
-          - sturgmap module: sturgmap.py
+          - sturgmap module: sturgmap.md
           - common module: common.md
     - Lab:
           - 510labs/GEOG_510_lab4.ipynb
