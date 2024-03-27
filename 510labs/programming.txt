@@ -1,0 +1,4 @@
+I like that you can create visualization techniques to solve problems
+I love that you can create different functions and loops for those functions based on user inputs.
+I like that you can create functions to aid in analysis
+i like that you can create visualizations using python code
