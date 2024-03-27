@@ -47,10 +47,10 @@ plugins:
     - mkdocs-jupyter:
           include_source: True
           ignore_h1_titles: True
-          execute: False
+          execute: True
           allow_errors: false
           ignore: ["conf.py"]
-          execute_ignore: ["*ignore.ipynb"]
+          execute_ignore: ["510labs/GEOG_510_lab4.ipynb", "510labs/GEOG510_lab5.ipynb", "ipyleaflet.ipynb"]
           
 markdown_extensions:
     - admonition
