@@ -4,10 +4,10 @@ import ipyleaflet
 from ipyleaflet import basemaps
 
 class Map(ipyleaflet.Map):
-    """_summary_
+    """Inherits ipyleaflet.Map map class
 
     Args:
-        ipyleaflet (_type_): _description_
+        ipyleaflet (_type_): The ipyleaflet.map Class
     """
     def __init__(self, center=[20, 0], zoom=2, **kwargs):
         """_summary_
@@ -29,3 +29,42 @@ class Map(ipyleaflet.Map):
             self.add_tile_layer(url, name)
         else:
             self.add_name()
+
+    def add_geojson(self, data, name="geojson", **kwargs):
+        """_summary_
+
+        Args:
+            data (_type_): _description_
+            name (str, optional): _description_. Defaults to "geojson".
+        """
+        import json
+
+        if isinstance(data, str):
+            with open(data) as f:
+                data = json.load(f)
+
+            if "style" not in kwargs:
+                kwargs["style"] = {"color": "green", "weight": 1, "fillOpacity": 0}
+
+            if "hover_style" not in kwargs:
+                kwargs["hover_style"] = {"fillColor": "#00ff00", "fillOpacity": 0.5}
+
+            layer = ipyleaflet.GeoJSON(data=data, name=name, **kwargs)
+            self.add(layer)
+
+
+    def add_shp(self, data, name="shp", **kwargs):
+        """ Allows users to add shapefiles to the package and load them
+
+        Args:
+            data (_type_): _description_
+            name (str, optional): _description_. Defaults to "shp".
+        """
+        import shapefile
+        import json
+
+        if isinstance(data, str):
+            with shapefile.Reader(data) as shp:
+                data = shp.__geo_interface__
+
+        self.add_geojson(data, name, **kwargs)
