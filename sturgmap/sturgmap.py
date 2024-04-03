@@ -51,8 +51,7 @@ class Map(ipyleaflet.Map):
 
             layer = ipyleaflet.GeoJSON(data=data, name=name, **kwargs)
             self.add(layer)
-
-
+    
     def add_shp(self, data, name="shp", **kwargs):
         """ Allows users to add shapefiles to the package and load them
 
