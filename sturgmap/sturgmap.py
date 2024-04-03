@@ -21,3 +21,4 @@ class Map(ipyleaflet.Map):
     def add_tile_layer(self, url, name, **kwargs):
         layer= ipyleaflet.TileLayer(url=url, name=name, **kwargs)
         self.add(layer)
+            
