@@ -2,6 +2,7 @@
 
 import ipyleaflet
 from ipyleaflet import basemaps
+import geopandas as gpd
 
 class Map(ipyleaflet.Map):
     """Inherits ipyleaflet.Map map class
@@ -24,6 +25,11 @@ class Map(ipyleaflet.Map):
         self.add(layer)
 
     def add_basemap(self, name):
+        """Adds a basemap based on the basemap options provided from ipyleaflet.
+
+        Args:
+            name (_type_): _description_
+        """
         if isinstance(name, str):
             url = eval(f"basemaps.{name}").build_url()
             self.add_tile_layer(url, name)
@@ -67,3 +73,38 @@ class Map(ipyleaflet.Map):
                 data = shp.__geo_interface__
 
         self.add_geojson(data, name, **kwargs)
+
+    def add_vector(self, data, name="vector", **kwargs):
+        """
+    Adds a vector data layer to the map.
+
+    Parameters:
+        data (str or GeoDataFrame): The vector data to be added. It can be either a file path to a vector data file (GeoJSON, shapefile, etc.) or a GeoDataFrame object.
+        name (str): The name of the vector data layer. Default is "vector".
+        **kwargs: Additional keyword arguments to pass to the add_geojson() method.
+
+    Raises:
+        None
+
+    Returns:
+        None
+    """
+        if isinstance(data, str):
+            try:
+               
+                vector_data = gpd.read_file(data)
+            except Exception as e:
+                print(f"Error reading vector data from file: {e}")
+                return
+        elif isinstance(data, gpd.GeoDataFrame):
+           
+            vector_data = data
+        else:
+            print("Unsupported vector data format.")
+            return
+
+        
+        geojson_data = vector_data.__geo_interface__
+
+      
+        self.add_geojson(geojson_data, name, **kwargs)
