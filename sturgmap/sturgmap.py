@@ -2,7 +2,6 @@
 
 import ipyleaflet
 from ipyleaflet import basemaps
-import geopandas as gpd
 
 class Map(ipyleaflet.Map):
     """Inherits ipyleaflet.Map map class
