@@ -2,6 +2,7 @@
 
 import ipyleaflet
 from ipyleaflet import basemaps
+import pandas
 
 class Map(ipyleaflet.Map):
     """Inherits ipyleaflet.Map map class
@@ -107,3 +108,32 @@ class Map(ipyleaflet.Map):
 
       
         self.add_geojson(geojson_data, name, **kwargs)
+
+    def add_raster(self, data, name="raster", zoom_to_layer=True, **kwargs):
+        """Adds a raster to the map and allows the user to input whichever raster 
+        they choose to analyze.
+
+        Args:
+            data (_type_): _description_
+            name (str, optional): _description_. Defaults to "raster".
+            zoom_to_layer (bool, optional): _description_. Defaults to True.
+
+        Raises:
+            ImportError: _description_
+        """
+
+
+        try:
+            from localtileserver import TileClient, get_leaflet_tile_layer
+        except ImportError:
+            raise ImportError("Please install the localtileserver package.")
+
+        client = TileClient(data)
+        layer = get_leaflet_tile_layer(client, name=name, **kwargs)
+        self.add(layer)
+
+        if zoom_to_layer:
+            self.center = client.center()
+            self.zoom = client.default_zoom
+    
+
