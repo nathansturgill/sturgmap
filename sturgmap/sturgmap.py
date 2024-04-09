@@ -2,7 +2,6 @@
 
 import ipyleaflet
 from ipyleaflet import basemaps
-import pandas
 
 class Map(ipyleaflet.Map):
     """Inherits ipyleaflet.Map map class
