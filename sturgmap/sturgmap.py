@@ -136,4 +136,13 @@ class Map(ipyleaflet.Map):
             self.center = client.center()
             self.zoom = client.default_zoom
     
+    def add_image(self, url, bounds, name="image", **kwargs):
+        """Adds an image to the map.
 
+        Args:
+            url (str): The URL of the image.
+            bounds (list): The bounds of the image.
+            name (str, optional): The name of the layer. Defaults to "image".
+        """
+        layer = ipyleaflet.ImageOverlay(url=url, bounds=bounds, name=name, **kwargs)
+        self.add(layer)
