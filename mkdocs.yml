@@ -50,7 +50,7 @@ plugins:
           execute: True
           allow_errors: false
           ignore: ["conf.py"]
-          execute_ignore: ["510labs/GEOG_510_lab4.ipynb", "510labs/GEOG510_lab5.ipynb", "ipyleaflet.ipynb", "vectordata.ipynb", "raster.ipynb"]
+          execute_ignore: ["510labs/GEOG_510_lab4.ipynb", "510labs/GEOG510_lab5.ipynb", "ipyleaflet.ipynb", "vectordata.ipynb", "raster.ipynb", "ipywidgets.ipynb"]
           
 markdown_extensions:
     - admonition
@@ -84,6 +84,7 @@ nav:
         - examples/ipyleaflet.ipynb
         - examples/vectordata.ipynb
         - examples/raster.ipynb
+        - examples/ipywidgets.ipynb
     - API Reference:
           - sturgmap module: sturgmap.md
           - common module: common.md
