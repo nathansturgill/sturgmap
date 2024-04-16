@@ -1,7 +1,8 @@
 """Main module."""
 
 import ipyleaflet
-from ipyleaflet import basemaps, WidgetControl
+from ipyleaflet import basemaps
+from ipyleaflet import WidgetControl
 import ipywidgets as widgets
 
 
@@ -219,9 +220,31 @@ class Map(ipyleaflet.Map):
         )
 
         def update_basemap(change):
+            """This allows users to add new basemaps based on the options given. Also allows for users to close basemap option.
+
+            Args:
+                change (_type_): _description_
+            """
             self.add_basemap(change["new"])
 
         basemap_selector.observe(update_basemap, "value")
 
-        control = ipyleaflet.WidgetControl(widget=basemap_selector, position=position)
-        self.add(control)
+        close_button = widgets.Button(description="Close")
+
+        
+        def close_dropdown(_):
+            """This adds functionality for the user to close the selected basemap after
+        they choose one of the four options for their basemap.
+
+            Args:
+                _ (_type_): _description_
+            """            
+            self.remove_control(basemap_control)  
+
+        close_button.on_click(close_dropdown)
+
+        widget_box = widgets.VBox([basemap_selector, close_button])
+
+        basemap_control = ipyleaflet.WidgetControl(widget=widget_box, position=position)
+
+        self.add_control(basemap_control)
