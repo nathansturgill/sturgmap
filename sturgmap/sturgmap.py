@@ -1,9 +1,11 @@
 """Main module."""
 
 import ipyleaflet
-from ipyleaflet import basemaps
+from ipyleaflet import basemaps, TileLayer
 from ipyleaflet import WidgetControl
 import ipywidgets as widgets
+import os
+from osgeo import gdal
 
 
 class Map(ipyleaflet.Map):
@@ -19,6 +21,10 @@ class Map(ipyleaflet.Map):
             center (list, optional): _description_. Defaults to [20, 0].
             zoom (int, optional): _description_. Defaults to 2.
         """
+        self.left_layer = None
+        self.right_layer = None
+        self.split_control = None
+
         super().__init__(center=center, zoom=zoom, **kwargs)
         self.add_control(ipyleaflet.LayersControl())
     
@@ -330,3 +336,51 @@ class Map(ipyleaflet.Map):
 
         for tool in grid.children:
             tool.on_click(toolbar_callback)
+
+    def add_basemap_to_split(self, name, side="left"):
+        """Adds a basemap to a specific side of the split map.
+
+        Args:
+            name (_type_): The name of the basemap (e.g., "OpenStreetMap").
+            side (str, optional): The side to add the basemap to ("left" or "right"). Defaults to "left".
+        """
+        if isinstance(name, str):
+            url = eval(f"basemaps.{name}").build_url()
+            if side == "left":
+                self.left_layer = TileLayer(url=url, name=name)
+                if self.right_layer:
+                    self.split_map.left_layer = self.left_layer
+                    self.split_map.split()
+                else:
+                    self.add_layer(self.left_layer)
+            elif side == "right":
+                self.right_layer = TileLayer(url=url, name=name)
+                if self.left_layer:
+                    self.split_map = ipyleaflet.SplitMapControl(layers=[self.left_layer, self.right_layer])
+                    self.split()
+                else:
+                    print("Please add a basemap to the left side before adding one to the right.")
+            else:
+                print(f"Invalid side: {side}. Choose 'left' or 'right'.")
+
+    def split(self):
+        """Creates and displays the split map if both left and right basemaps are set."""
+        if self.left_layer and self.right_layer:
+            self.remove_layer(self.left_layer)
+            self.remove_layer(self.right_layer)
+            self.add_control(self.split_map)
+            self.split_map.split()
+        else:
+            print("Both left and right basemaps need to be set before splitting.")
+
+    def set_split_position(self, position=0.5):
+        """Sets the position of the split between the two sides.
+
+        Args:
+            position (float, optional): The position of the split (0.0 to 1.0). Defaults to 0.5.
+        """
+        if self.split_control:
+            self.split_control.split_position = position
+        else:
+            print("Split map is not yet created. Add basemaps to both sides first.")
+    
