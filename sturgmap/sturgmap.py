@@ -1,10 +1,8 @@
 """Main module."""
 
 import ipyleaflet
-from ipyleaflet import basemaps, TileLayer, SplitMapControl
-from ipyleaflet import Map
+from ipyleaflet import Map, basemaps, TileLayer, basemap_to_tiles, SplitMapControl
 from ipyleaflet import WidgetControl
-from ipyleaflet import basemap_to_tiles
 import ipywidgets as widgets
 import os
 
@@ -365,3 +363,26 @@ class Map(ipyleaflet.Map):
        split_map = ipyleaflet.SplitMapControl(left_layer=left_layer, right_layer=right_layer)
        self.split_control = split_map
        self.add_control(split_map)
+
+    def add_scale_bar(self, position="bottomleft", **kwargs):
+        """Adds a scale bar to the map.
+
+        Args:
+        position (str, optional): The position of the scale bar. Defaults to "bottomleft".
+        **kwargs: Additional keyword arguments to pass to the ipyleaflet.ScaleControl constructor.
+        """
+        scale_control = ipyleaflet.ScaleControl(position=position, **kwargs)
+        self.add_control(scale_control)
+
+
+    def add_marker(self, location, popup_text=None, icon=None, **kwargs):
+        """Adds a marker to the map.
+
+        Args:
+        location (list): The latitude and longitude coordinates of the marker.
+        popup_text (str, optional): The text to be displayed in a popup when the marker is clicked. Defaults to None.
+        icon (ipyleaflet.Icon, optional): A custom icon for the marker. Defaults to None.
+        **kwargs: Additional keyword arguments to pass to the ipyleaflet.Marker constructor.
+        """
+        marker = ipyleaflet.Marker(location=location, popup=popup_text, icon=icon, **kwargs)
+        self.add(marker)
