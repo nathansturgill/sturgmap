@@ -386,3 +386,5 @@ class Map(ipyleaflet.Map):
         """
         marker = ipyleaflet.Marker(location=location, popup=popup_text, icon=icon, **kwargs)
         self.add(marker)
+
+    

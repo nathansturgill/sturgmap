@@ -12,6 +12,7 @@ pytest-runner
 
 ipykernel
 livereload
+localtileserver
 nbconvert
 nbformat
 sphinx
