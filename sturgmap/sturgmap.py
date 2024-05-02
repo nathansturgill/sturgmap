@@ -1,10 +1,11 @@
 """Main module."""
 
 import ipyleaflet
-from ipyleaflet import Map, basemaps, TileLayer, basemap_to_tiles, SplitMapControl
+from ipyleaflet import Map, basemaps, TileLayer, SplitMapControl
 from ipyleaflet import WidgetControl
 import ipywidgets as widgets
 import os
+
 
 
 
@@ -335,7 +336,7 @@ class Map(ipyleaflet.Map):
         for tool in grid.children:
             tool.on_click(toolbar_callback)
     
-    def split_map(self, left_layer, right_layer):
+    def split_map_basemap(self, left_layer, right_layer):
        """
        Creates a split-screen map with two layers side-by-side.
 
@@ -387,4 +388,15 @@ class Map(ipyleaflet.Map):
         marker = ipyleaflet.Marker(location=location, popup=popup_text, icon=icon, **kwargs)
         self.add(marker)
 
-    
+    def add_split_map(self, left_layer, right_layer, **kwargs):
+        """Adds a split map to the current map.
+        Args:
+            left_layer (object): The left layer of the split map.
+            right_layer (object): The right layer of the split map.
+        """
+
+        control = SplitMapControl(
+            left_layer=left_layer,
+            right_layer=right_layer,
+        )
+        self.add(control)

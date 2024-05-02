@@ -2,7 +2,7 @@ import folium
 from ipyleaflet import basemaps
 from folium import Map, Marker, TileLayer
 from folium.plugins import DualMap
-import rasterio as rio
+import rasterio 
 from rasterio.io import MemoryFile
 import folium.plugins
 from folium.plugins import SideBySideLayers
@@ -82,7 +82,7 @@ class Map(folium.Map):
 
         folium.LayerControl().add_to(self)
     
-    def raster_split_map(self, layer_left, layer_right):
+    def raster_split_map(self, layer_left_url, layer_right_url, left_name, right_name):
         """
         Create a split map with layers on left and right sides.
 
@@ -90,14 +90,38 @@ class Map(folium.Map):
             None
         """
         
-        sbs = folium.plugins.SideBySideLayers(layer_left=layer_left, layer_right=layer_right)
+        
+        #bbox = cog_bounds(left_layer)
+        #bounds = [(bbox[1], bbox[0]), (bbox[3], bbox[2])]
+        left_url = cog_tile(layer_left_url, **left_args)
+        bbox = cog_bounds(layer_left_url)
+        bounds = [(bbox[1], bbox[0]), (bbox[3], bbox[2])]
+        layer_left = folium.raster_layers.TileLayer(
+                        tiles=left_url,
+                        name=left_name,
+                        attr=" ",
+                        overlay=True,
+        )
+        right_url = cog_tile(layer_left_url, **left_args)
+        bbox = cog_bounds(layer_left_url)
+        bounds = [(bbox[1], bbox[0]), (bbox[3], bbox[2])]
+        layer_right = folium.raster_layers.TileLayer(
+                        tiles=right_url,
+                        name=right_name,
+                        attr=" ",
+                        overlay=True,
+        )
 
+        sbs = folium.plugins.SideBySideLayers(layer_left=layer_left, layer_right=layer_right)
         # Add left and right layers to the DualMap
         layer_left.add_to(self)
         layer_right.add_to(self)
 
         # Add the DualMap to the main map
         sbs.add_to(self)
+
+        if bounds is not None:
+            self.fit_bounds(bounds)
 
 #        left_pane = folium.map.FeatureGroup(name='Left Pane', overlay=True)
 #        for layer in self.left_layers:
@@ -151,3 +175,20 @@ class Map(folium.Map):
 
         # Append the DualMap to the list of side-by-side layers
         #self.side_by_side_layers.append(sbs)
+    
+    def add_shapefile(self, data, name="shapefile", **kwargs):
+        """Adds a shapefile layer to the map.
+
+        Args:
+            data (str): The path to the shapefile.
+            name (str, optional): The name of the layer. Defaults to "shapefile".
+        """
+
+        try:
+            from localtileserver import TileClient, get_folium_tile_layer
+        except ImportError:
+            raise ImportError("Please install the localtileserver package.")
+
+        client = TileClient(data)
+        layer = get_folium_tile_layer(client, name=name, **kwargs)
+        layer.add_to(self)
