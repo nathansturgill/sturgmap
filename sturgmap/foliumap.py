@@ -6,6 +6,7 @@ import rasterio as rio
 from rasterio.io import MemoryFile
 import folium.plugins
 from folium.plugins import SideBySideLayers
+from folium import raster_layers
 
 
 class Map(folium.Map):
@@ -81,7 +82,7 @@ class Map(folium.Map):
 
         folium.LayerControl().add_to(self)
     
-    def split_map(self):
+    def raster_split_map(self, layer_left, layer_right):
         """
         Create a split map with layers on left and right sides.
 
@@ -89,23 +90,32 @@ class Map(folium.Map):
             None
         """
         
-        left_pane = folium.map.FeatureGroup(name='Left Pane', overlay=True)
-        for layer in self.left_layers:
-            if isinstance(layer, str): 
-                self.add_raster(layer, name="Left Raster", group="Left Pane")
-            else:  
-                layer.add_to(left_pane)
+        sbs = folium.plugins.SideBySideLayers(layer_left=layer_left, layer_right=layer_right)
+
+        # Add left and right layers to the DualMap
+        layer_left.add_to(self)
+        layer_right.add_to(self)
+
+        # Add the DualMap to the main map
+        sbs.add_to(self)
+
+#        left_pane = folium.map.FeatureGroup(name='Left Pane', overlay=True)
+#        for layer in self.left_layers:
+#            if isinstance(layer, str): 
+#                self.add_raster(layer, name="Left Raster", group="Left Pane")
+#            else:  
+#                layer.add_to(left_pane)
        
-        right_pane = folium.map.FeatureGroup(name='Right Pane', overlay=True)
-        for layer in self.right_layers:
-            if isinstance(layer, str):
-                self.add_raster(layer, name="Right Raster", group="Right Pane")
-            else:
-                layer.add_to(right_pane)
+#        right_pane = folium.map.FeatureGroup(name='Right Pane', overlay=True)
+#        for layer in self.right_layers:
+#            if isinstance(layer, str):
+#                self.add_raster(layer, name="Right Raster", group="Right Pane")
+#            else:
+#                layer.add_to(right_pane)
 
         
-        self.add_child(left_pane)
-        self.add_child(right_pane)
+#        self.add_child(left_pane)
+#        self.add_child(right_pane)
 
     
         folium.map.LayerControl().add_to(self)
@@ -129,14 +139,15 @@ class Map(folium.Map):
         layer.add_to(self)
 
     def add_side_by_side_layers(self, layer_left, layer_right):
-        sbs = folium.plugins.DualMap(location=self.location, control_scale=True)
+        #sbs = folium.plugins.SideBySideLayers(location=self.location, control_scale=True)
+        sbs = folium.plugins.SideBySideLayers(layer_left=layer_left, layer_right=layer_right)
 
         # Add left and right layers to the DualMap
-        layer_left.add_to(sbs.m1)
-        layer_right.add_to(sbs.m2)
+        layer_left.add_to(self)
+        layer_right.add_to(self)
 
         # Add the DualMap to the main map
         sbs.add_to(self)
 
         # Append the DualMap to the list of side-by-side layers
-        self.side_by_side_layers.append(sbs)
+        #self.side_by_side_layers.append(sbs)
