@@ -2,6 +2,10 @@ import folium
 from ipyleaflet import basemaps
 from folium import Map, Marker, TileLayer
 from folium.plugins import DualMap
+import rasterio as rio
+from rasterio.io import MemoryFile
+import folium.plugins
+from folium.plugins import SideBySideLayers
 
 
 class Map(folium.Map):
@@ -10,24 +14,9 @@ class Map(folium.Map):
         super().__init__(location=center, zoom_start=zoom, **kwargs)
         self.left_layers = left_layer or []
         self.right_layers = right_layer or []
-        self.basemaps = basemaps or {
-            "OpenStreetMap": folium.TileLayer(
-                tiles='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
-                attr='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                name="OpenStreetMap"
-            ),
-            "ESRI.World_Imagery": folium.TileLayer(
-                tiles="https://server.arcgiserver.com/ArcGIS/rest/services/World_Imagery/BaseMap/tile/{z}/{y}/{x}.jpg",
-                name="ESRI.World_Imagery",
-                attr="&copy; <a href='https://www.esri.com/'>Esri</a>, &copy; <a href='https://resources.arcgiserver.com/en-us/help/main/topics/web-services-and-api-terms-of-use.htm'>ArcGIS</a>"
-            ),
-            "USGS National Basemap": folium.TileLayer(
-        tiles="https://basemap.nationalatlas.gov/arcgis/rest/services/National_Basemap/National_Basemap/tile/{z}/{y}/{x}.jpg",
-        name="USGS National Basemap",
-        attr="&copy; <a href='https://www.usgs.gov/'>U.S. Geological Survey</a>"
-            ),
-        }
-        self.current_basemap = self.basemaps["OpenStreetMap"]  
+        self.basemaps = basemaps 
+        self.current_basemap = self.basemaps["OpenStreetMap"]
+        self.side_by_side_layers = []
     
     def add_tile_layer(self, url, name, attribution="Custom Tile", **kwargs):
         """
@@ -139,43 +128,15 @@ class Map(folium.Map):
         layer = get_folium_tile_layer(client, name=name, **kwargs)
         layer.add_to(self)
 
+    def add_side_by_side_layers(self, layer_left, layer_right):
+        sbs = folium.plugins.DualMap(location=self.location, control_scale=True)
 
-    def raster_split_map(self, left_map_layer, right_map_layer):
-        """
-        Create a split map with different basemaps or raster files on left and right sides.
+        # Add left and right layers to the DualMap
+        layer_left.add_to(sbs.m1)
+        layer_right.add_to(sbs.m2)
 
-        Args:
-            left_map_layer: Basemap or raster file for the left side of the split map.
-            right_map_layer: Basemap or raster file for the right side of the split map.
+        # Add the DualMap to the main map
+        sbs.add_to(self)
 
-        Returns:
-            None
-        """
-
-        left_map = folium.Map(location=self.location)
-        if isinstance(left_map_layer, str):  
-            left_map.add_raster(left_map_layer)
-        else: 
-            left_map_layer.add_to(left_map)
-
-
-        right_map = folium.Map(location=self.location)
-        if isinstance(right_map_layer, str):  
-            right_map.add_raster(right_map_layer)
-        else:  
-            right_map_layer.add_to(right_map)
-
-        
-        split_control = DualMap(left_map, right_map)
-        self.add_child(split_control)
-
-    def set_basemap(self, name):
-        # Simplified basemap selection (doesn't use dropdown)
-        if name in self.basemaps:
-            self.current_basemap = self.basemaps[name]
-            # Update map elements based on the new basemap (if applicable)
-            print(f"Current basemap: {self.current_basemap.name}")
-        else:
-            print(f"Basemap '{name}' not found.")
-
-    
+        # Append the DualMap to the list of side-by-side layers
+        self.side_by_side_layers.append(sbs)
