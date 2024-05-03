@@ -90,6 +90,9 @@ nav:
     - API Reference:
           - sturgmap module: sturgmap.md
           - common module: common.md
-    - Lab:
+    - Labs:
           - 510labs/GEOG_510_lab4.ipynb
           - 510labs/GEOG510_lab5.ipynb
+    
+    - Website:
+        -  https://sturgmap.streamlit.app/

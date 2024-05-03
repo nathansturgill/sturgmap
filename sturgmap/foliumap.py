@@ -2,11 +2,16 @@ import folium
 from ipyleaflet import basemaps
 from folium import Map, Marker, TileLayer
 from folium.plugins import DualMap
-import rasterio 
+import rasterio
 from rasterio.io import MemoryFile
 import folium.plugins
 from folium.plugins import SideBySideLayers
 from folium import raster_layers
+import shapefile
+import geopandas as gpd
+import json
+from folium import Element
+
 
 
 class Map(folium.Map):
@@ -18,6 +23,24 @@ class Map(folium.Map):
         self.basemaps = basemaps 
         self.current_basemap = self.basemaps["OpenStreetMap"]
         self.side_by_side_layers = []
+        self.click_coordinates = []
+        
+        self.add_child(folium.Element(
+            """
+            <script>
+            var map = document.querySelector('.folium-map');
+
+            map.addEventListener('click', function(e) {
+                var latitude = e.latlng.lat;
+                var longitude = e.latlng.lng;
+                var marker = L.marker([latitude, longitude])
+                    .addTo(map)
+                    .bindTooltip('Lat: ' + latitude + ', Lon: ' + longitude)
+                    .openTooltip();
+            });
+            </script>
+            """
+        ))
     
     def add_tile_layer(self, url, name, attribution="Custom Tile", **kwargs):
         """
@@ -82,7 +105,7 @@ class Map(folium.Map):
 
         folium.LayerControl().add_to(self)
     
-    def raster_split_map(self, layer_left_url, layer_right_url, left_name, right_name):
+    #def raster_split_map(self, layer_left_url, layer_right_url, left_name, right_name):
         """
         Create a split map with layers on left and right sides.
 
@@ -176,19 +199,50 @@ class Map(folium.Map):
         # Append the DualMap to the list of side-by-side layers
         #self.side_by_side_layers.append(sbs)
     
-    def add_shapefile(self, data, name="shapefile", **kwargs):
-        """Adds a shapefile layer to the map.
+    def add_geojson(self, data, name="geojson", **kwargs):
+        """Adds a GeoJSON layer to the map.
 
         Args:
-            data (str): The path to the shapefile.
-            name (str, optional): The name of the layer. Defaults to "shapefile".
+            data (str | dict): The GeoJSON data as a string or a dictionary.
+            name (str, optional): The name of the layer. Defaults to "geojson".
         """
+        if isinstance(data, str):
+            with open(data) as f:
+                data = json.load(f)
 
-        try:
-            from localtileserver import TileClient, get_folium_tile_layer
-        except ImportError:
-            raise ImportError("Please install the localtileserver package.")
+        folium.GeoJson(data, name=name, **kwargs).add_to(self)
 
-        client = TileClient(data)
-        layer = get_folium_tile_layer(client, name=name, **kwargs)
-        layer.add_to(self)
+
+    def add_shp(self, data, name="shp", **kwargs):
+        """
+        Adds a shapefile to the current map.
+
+        Args:
+            data (str or dict): The path to the shapefile as a string, or a dictionary representing the shapefile.
+            name (str, optional): The name of the layer. Defaults to "shp".
+            **kwargs: Arbitrary keyword arguments.
+        """
+        if isinstance(data, str):
+            data = gpd.read_file(data).to_json()
+
+        self.add_geojson(data, name, **kwargs)
+
+    def add_markers(self):
+        """
+        Adds markers to the map and returns a list of clicked coordinates.
+
+        Returns:
+        list: A list of tuples containing the clicked latitude and longitude coordinates.
+        """
+        def on_click(event, **kwargs):
+            """
+        Event handler for when a user clicks on the map.
+        Adds a marker to the clicked position and appends its coordinates to the list.
+        """
+        lat, lon = event['coordinates']
+        self.click_coordinates.append((lat, lon))
+        marker = Marker([lat, lon], tooltip=f'Lat: {lat}, Lon: {lon}')
+        marker.add_to(self)
+
+        self.on_click(on_click)
+

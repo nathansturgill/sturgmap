@@ -1,7 +1,7 @@
 """Main module."""
 
 import ipyleaflet
-from ipyleaflet import Map, basemaps, TileLayer, SplitMapControl
+from ipyleaflet import Map, basemaps, TileLayer, SplitMapControl, Marker
 from ipyleaflet import WidgetControl
 import ipywidgets as widgets
 import os
@@ -22,6 +22,7 @@ class Map(ipyleaflet.Map):
             center (list, optional): _description_. Defaults to [20, 0].
             zoom (int, optional): _description_. Defaults to 2.
         """
+
         self.split_control=None
 
         super().__init__(center=center, zoom=zoom, **kwargs)
@@ -376,18 +377,6 @@ class Map(ipyleaflet.Map):
         self.add_control(scale_control)
 
 
-    def add_marker(self, location, popup_text=None, icon=None, **kwargs):
-        """Adds a marker to the map.
-
-        Args:
-        location (list): The latitude and longitude coordinates of the marker.
-        popup_text (str, optional): The text to be displayed in a popup when the marker is clicked. Defaults to None.
-        icon (ipyleaflet.Icon, optional): A custom icon for the marker. Defaults to None.
-        **kwargs: Additional keyword arguments to pass to the ipyleaflet.Marker constructor.
-        """
-        marker = ipyleaflet.Marker(location=location, popup=popup_text, icon=icon, **kwargs)
-        self.add(marker)
-
     def add_split_map(self, left_layer, right_layer, **kwargs):
         """Adds a split map to the current map.
         Args:
@@ -400,3 +389,29 @@ class Map(ipyleaflet.Map):
             right_layer=right_layer,
         )
         self.add(control)
+    
+    def add_markers(self):
+        """
+        Adds markers to the map and returns a list of clicked coordinates.
+
+        Returns:
+            list: A list of tuples containing the clicked latitude and longitude coordinates.
+        """
+        self.click_coordinates = []
+
+        def on_click_handler(event=None, **kwargs):
+            """
+            Callback function to store clicked coordinates and add markers.
+
+            Args:
+                event (dict): The click event object.
+            """
+            if event and 'coordinates' in event:
+                lat, lon = event['coordinates']
+                self.click_coordinates.append((lat, lon))
+                marker = Marker(location=(lat, lon))
+                self.add_layer(marker)
+
+        self.on_interaction(on_click_handler)
+
+        return self.click_coordinates
