@@ -398,7 +398,7 @@ class Map(ipyleaflet.Map):
         of the position you click on
 
         Args:
-            postion (str, opitional): the position of the widget defaults to
+            position (str, optional): the position of the widget defaults to
             bottom right of the map display
         """
 
