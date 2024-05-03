@@ -14,4 +14,7 @@
 
 ## Features
 
--   TODO
+- Creative Interactive Maps
+- Visualize Geospatial Data
+- Visualize Raster and Vector Data with Split Map functionality
+- Import Basemaps and Maps for geospatial analysis

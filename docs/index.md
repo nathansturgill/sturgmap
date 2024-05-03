@@ -12,6 +12,8 @@
     
 
 ## Features
+    Hello!
+    This package was designed for the user looking for geospatial raster/vector and basemap analysis. The package has many capable features include side by side layer maps in folium and split map functionality used for basemaps and raster files. In the examples section of this website you can see how the split map functionality works for the package in the split map notebook and how it looks when using the side by side function in the folium notebook. The user can also add all kinds of data to whichever basemap they chose to start off with including raster files, shapefiles, vector data, geojson files and more. Below are some of the key features.
 
 -   Creative Interactive Maps
 -   Visualize Geospatial Data
