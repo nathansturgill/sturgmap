@@ -4,6 +4,9 @@ import ipyleaflet
 from ipyleaflet import Map, basemaps, TileLayer, SplitMapControl, Marker
 from ipyleaflet import WidgetControl
 import ipywidgets as widgets
+import rasterio
+import numpy as np
+import matplotlib.pyplot as plt
 import os
 
 
@@ -390,28 +393,130 @@ class Map(ipyleaflet.Map):
         )
         self.add(control)
     
-    def add_markers(self):
+    def add_coordinate_widget(self, position="bottomright"):
+        """Adds a coordinate widget to the map to retrieve the coordinates
+        of the position you click on
+
+        Args:
+            postion (str, opitional): the position of the widget defaults to
+            bottom right of the map display
         """
-        Adds markers to the map and returns a list of clicked coordinates.
 
-        Returns:
-            list: A list of tuples containing the clicked latitude and longitude coordinates.
+        output = widgets.Output()
+        control= WidgetControl(widget=output, position=position)
+        self.add(control)
+
+        with output:
+            print("click on the map")
+
+        def update_latlon(**kwargs):
+            with output:
+                if kwargs.get("type") == "click":
+                    latlon= kwargs.get("coordinates")
+                    output.clear_output()
+                    print(f"Latitude: {latlon[0]:.2f}, Longitude: {latlon[1]:.2f}")
+        
+        self.on_interaction(update_latlon)
+
+
+
+
+    def display_raster_histogram(self, raster):
         """
-        self.click_coordinates = []
+        Display histogram of pixel values in the raster.
 
-        def on_click_handler(event=None, **kwargs):
-            """
-            Callback function to store clicked coordinates and add markers.
+        Args:
+            raster (rasterio.DatasetReader): The raster dataset.
+        """
+        data = raster.read(1)
+        plt.hist(data.flatten(), bins=50, color='b', alpha=0.7)
+        plt.xlabel('Pixel Value')
+        plt.ylabel('Frequency')
+        plt.title('Raster Histogram')
+        plt.show()
 
-            Args:
-                event (dict): The click event object.
-            """
-            if event and 'coordinates' in event:
-                lat, lon = event['coordinates']
-                self.click_coordinates.append((lat, lon))
-                marker = Marker(location=(lat, lon))
-                self.add_layer(marker)
+    def calculate_statistics(self, raster):
+        """
+        Calculate basic statistics of the raster.
 
-        self.on_interaction(on_click_handler)
+        Args:
+            raster (rasterio.DatasetReader): The raster dataset.
+        """
+        data = raster.read(1)
+        print(f"Minimum: {data.min()}")
+        print(f"Maximum: {data.max()}")
+        print(f"Mean: {data.mean()}")
+        print(f"Standard Deviation: {data.std()}")
 
-        return self.click_coordinates
+    def crop_raster(self, raster, bounds):
+        """
+        Crop the raster to the specified extent.
+
+        Args:
+            raster (rasterio.DatasetReader): The raster dataset.
+            bounds (tuple): The bounding box to crop to in the format (minx, miny, maxx, maxy).
+        """
+        from rasterio.enums import Resampling
+
+        crop_window = rasterio.windows.from_bounds(*bounds, transform=raster.transform)
+
+        cropped_data = raster.read(window=crop_window)
+        cropped_transform = raster.window_transform(crop_window)
+
+        # Update metadata
+        new_meta = raster.meta.copy()
+        new_meta.update({
+            'height': crop_window.height,
+            'width': crop_window.width,
+            'transform': cropped_transform
+        })
+
+        return cropped_data, new_meta
+
+    def resample_raster(self, raster, scale_factor):
+        """
+        Resample the raster to a different spatial resolution.
+
+        Args:
+            raster (rasterio.DatasetReader): The raster dataset.
+            scale_factor (float): The scaling factor for resampling.
+        """
+        from rasterio.enums import Resampling
+
+        data = raster.read(
+            out_shape=(
+                raster.count,
+                int(raster.height * scale_factor),
+                int(raster.width * scale_factor)
+            ),
+            resampling=Resampling.bilinear
+        )
+
+        # Update metadata
+        new_meta = raster.meta.copy()
+        new_meta.update({
+            'height': int(raster.height * scale_factor),
+            'width': int(raster.width * scale_factor),
+            'transform': raster.transform * raster.transform.scale(
+                (raster.width / data.shape[-1]),
+                (raster.height / data.shape[-2])
+            )
+        })
+
+        return data, new_meta
+
+    def compute_ndvi(self, nir_band, red_band):
+        """
+        Compute Normalized Difference Vegetation Index (NDVI) from near-infrared and red bands.
+
+        Args:
+            nir_band (rasterio.DatasetReader): The near-infrared band raster dataset.
+            red_band (rasterio.DatasetReader): The red band raster dataset.
+        """
+        nir_data = nir_band.read(1).astype(float)
+        red_data = red_band.read(1).astype(float)
+
+        ndvi = (nir_data - red_data) / (nir_data + red_data)
+
+        return ndvi
+

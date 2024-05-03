@@ -186,18 +186,17 @@ class Map(folium.Map):
         layer.add_to(self)
 
     def add_side_by_side_layers(self, layer_left, layer_right):
-        #sbs = folium.plugins.SideBySideLayers(location=self.location, control_scale=True)
+      
         sbs = folium.plugins.SideBySideLayers(layer_left=layer_left, layer_right=layer_right)
 
-        # Add left and right layers to the DualMap
+        
         layer_left.add_to(self)
         layer_right.add_to(self)
 
-        # Add the DualMap to the main map
+        
         sbs.add_to(self)
 
-        # Append the DualMap to the list of side-by-side layers
-        #self.side_by_side_layers.append(sbs)
+        
     
     def add_geojson(self, data, name="geojson", **kwargs):
         """Adds a GeoJSON layer to the map.
