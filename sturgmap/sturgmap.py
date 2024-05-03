@@ -6,6 +6,7 @@ from ipyleaflet import WidgetControl
 import ipywidgets as widgets
 import rasterio
 import numpy as np
+import matplotlib
 import matplotlib.pyplot as plt
 import os
 
