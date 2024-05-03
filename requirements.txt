@@ -3,3 +3,4 @@ ipyleaflet
 folium
 pandas
 localtileserver
+ipywidgets
