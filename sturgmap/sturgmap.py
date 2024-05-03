@@ -464,7 +464,7 @@ class Map(ipyleaflet.Map):
         cropped_data = raster.read(window=crop_window)
         cropped_transform = raster.window_transform(crop_window)
 
-        # Update metadata
+        
         new_meta = raster.meta.copy()
         new_meta.update({
             'height': crop_window.height,
