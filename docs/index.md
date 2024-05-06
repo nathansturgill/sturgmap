@@ -18,3 +18,6 @@
 -   Visualize Geospatial Data
 -   Visualize Raster and Vector Data with Split Map functionality
 -   Import Basemaps and Maps for geospatial analysis
+
+## Aim of the Package
+- This python package is designed to be an introductory package that can handle raster analysis along with geospatial analysis. The idea is that the package will be developed further to create more robust and capable raster analysis functions for users to use with just a few lines of code. 

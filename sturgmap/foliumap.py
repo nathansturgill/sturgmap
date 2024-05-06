@@ -11,7 +11,7 @@ import shapefile
 import geopandas as gpd
 import json
 from folium import Element
-
+import matplotlib.pyplot as plt
 
 
 class Map(folium.Map):
@@ -105,68 +105,7 @@ class Map(folium.Map):
 
         folium.LayerControl().add_to(self)
     
-    #def raster_split_map(self, layer_left_url, layer_right_url, left_name, right_name):
-        """
-        Create a split map with layers on left and right sides.
-
-        Returns:
-            None
-        """
-        
-        
-        #bbox = cog_bounds(left_layer)
-        #bounds = [(bbox[1], bbox[0]), (bbox[3], bbox[2])]
-        left_url = cog_tile(layer_left_url, **left_args)
-        bbox = cog_bounds(layer_left_url)
-        bounds = [(bbox[1], bbox[0]), (bbox[3], bbox[2])]
-        layer_left = folium.raster_layers.TileLayer(
-                        tiles=left_url,
-                        name=left_name,
-                        attr=" ",
-                        overlay=True,
-        )
-        right_url = cog_tile(layer_left_url, **left_args)
-        bbox = cog_bounds(layer_left_url)
-        bounds = [(bbox[1], bbox[0]), (bbox[3], bbox[2])]
-        layer_right = folium.raster_layers.TileLayer(
-                        tiles=right_url,
-                        name=right_name,
-                        attr=" ",
-                        overlay=True,
-        )
-
-        sbs = folium.plugins.SideBySideLayers(layer_left=layer_left, layer_right=layer_right)
-        # Add left and right layers to the DualMap
-        layer_left.add_to(self)
-        layer_right.add_to(self)
-
-        # Add the DualMap to the main map
-        sbs.add_to(self)
-
-        if bounds is not None:
-            self.fit_bounds(bounds)
-
-#        left_pane = folium.map.FeatureGroup(name='Left Pane', overlay=True)
-#        for layer in self.left_layers:
-#            if isinstance(layer, str): 
-#                self.add_raster(layer, name="Left Raster", group="Left Pane")
-#            else:  
-#                layer.add_to(left_pane)
-       
-#        right_pane = folium.map.FeatureGroup(name='Right Pane', overlay=True)
-#        for layer in self.right_layers:
-#            if isinstance(layer, str):
-#                self.add_raster(layer, name="Right Raster", group="Right Pane")
-#            else:
-#                layer.add_to(right_pane)
-
-        
-#        self.add_child(left_pane)
-#        self.add_child(right_pane)
-
     
-        folium.map.LayerControl().add_to(self)
-
     def add_raster(self, data, name="raster", **kwargs):
         """Adds a raster layer to the map.
 
@@ -245,3 +184,112 @@ class Map(folium.Map):
 
         self.on_click(on_click)
 
+    def display_raster_histogram(self, raster):
+        """
+        Display histogram of pixel values in the raster.
+
+        Args:
+            raster (rasterio.DatasetReader): The raster dataset.
+        """
+        data = raster.read(1)
+        plt.hist(data.flatten(), bins=50, color='b', alpha=0.7)
+        plt.xlabel('Pixel Value')
+        plt.ylabel('Frequency')
+        plt.title('Raster Histogram')
+        plt.show()
+
+    def calculate_statistics(self, raster):
+        """
+        Calculate basic statistics of the raster.
+
+        Args:
+            raster (rasterio.DatasetReader): The raster dataset.
+        """
+        data = raster.read(1)
+        print(f"Minimum: {data.min()}")
+        print(f"Maximum: {data.max()}")
+        print(f"Mean: {data.mean()}")
+        print(f"Standard Deviation: {data.std()}")
+
+    def crop_raster(self, raster, bounds):
+        """
+        Crop the raster to the specified extent.
+
+        Args:
+            raster (rasterio.DatasetReader): The raster dataset.
+            bounds (tuple): The bounding box to crop to in the format (minx, miny, maxx, maxy).
+        """
+        crop_window = rasterio.windows.from_bounds(*bounds, transform=raster.transform)
+
+        cropped_data = raster.read(window=crop_window)
+        cropped_transform = raster.window_transform(crop_window)
+
+        new_meta = raster.meta.copy()
+        new_meta.update({
+            'height': crop_window.height,
+            'width': crop_window.width,
+            'transform': cropped_transform
+        })
+
+        return cropped_data, new_meta
+
+    def resample_raster(self, raster, scale_factor):
+        """
+        Resample the raster to a different spatial resolution.
+
+        Args:
+            raster (rasterio.DatasetReader): The raster dataset.
+            scale_factor (float): The scaling factor for resampling.
+        """
+        data = raster.read(
+            out_shape=(
+                raster.count,
+                int(raster.height * scale_factor),
+                int(raster.width * scale_factor)
+            ),
+            resampling=rasterio.enums.Resampling.bilinear
+        )
+
+        new_meta = raster.meta.copy()
+        new_meta.update({
+            'height': int(raster.height * scale_factor),
+            'width': int(raster.width * scale_factor),
+            'transform': raster.transform * raster.transform.scale(
+                (raster.width / data.shape[-1]),
+                (raster.height / data.shape[-2])
+            )
+        })
+
+        return data, new_meta
+
+    def compute_ndvi(self, nir_band, red_band):
+        """
+        Compute Normalized Difference Vegetation Index (NDVI) from near-infrared and red bands.
+
+        Args:
+            nir_band (rasterio.DatasetReader): The near-infrared band raster dataset.
+            red_band (rasterio.DatasetReader): The red band raster dataset.
+        """
+        nir_data = nir_band.read(1).astype(float)
+        red_data = red_band.read(1).astype(float)
+
+        ndvi = (nir_data - red_data) / (nir_data + red_data)
+
+        return ndvi
+
+    def display_raster_folium(self, raster):
+        """
+        Display raster data on a Folium map.
+
+        Args:
+            raster (numpy.ndarray): The raster data.
+        """
+        m = folium.Map(location=[0, 0], zoom_start=2)
+
+        # Convert raster to image overlay
+        img = folium.raster_layers.ImageOverlay(
+            raster,
+            bounds=[[raster.min(), raster.min()], [raster.max(), raster.max()]],
+            opacity=0.6,
+            name="Raster Image"
+        )
