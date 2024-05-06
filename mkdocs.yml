@@ -96,4 +96,4 @@ nav:
           - 510labs/GEOG510_lab5.ipynb
     
     - Website:
-        - website: https://sturgmap.streamlit.app/
+        - website: https://sturgmap-web.streamlit.app/
