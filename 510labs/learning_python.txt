@@ -1,0 +1,4 @@
+ In python you can create loops to loop through a dictionary.\
+In python you can create while loops for conditional if and statements until the code is told to stop executing.\
+In python you can create lists that are ordered and undordered. \
+In python you can create different kinds of functions for your packages.
